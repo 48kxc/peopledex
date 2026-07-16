@@ -37,7 +37,7 @@ export async function onRequestPost(context: any) {
           role: 'user',
           content: [
             { type: 'image_url', image_url: { url: `data:image/jpeg;base64,${imageBase64}` } },
-            { type: 'text', text: `${prompt}\n\nRespond STRICT JSON only: {"answer": "YES"} or {"answer": "NO"}` },
+            { type: 'text', text: `${prompt}\n\nCRITICAL RULES:\n- Only answer YES if the trait/object is CLEARLY VISIBLE and UNMISTAKABLE in the photo.\n- If the relevant body part or item is NOT VISIBLE (e.g. back not shown, feet cropped out), answer NO.\n- Do NOT guess, infer, or assume based on context. You must SEE it.\n- If there is any ambiguity or doubt, answer NO.\n- A backpack must be VISIBLE on the person's back or shoulders. If you cannot see their back, answer NO.\n- Clothing colors must be clearly identifiable, not speculated from shadows.\n- Default to NO unless 100% certain.\n\nRespond STRICT JSON only: {"answer": "YES"} or {"answer": "NO"}` },
           ],
         }],
         max_tokens: 50,
