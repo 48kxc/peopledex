@@ -1,0 +1,9 @@
+name = "peopledex"
+compatibility_date = "2025-07-15"
+pages_build_output_dir = ".next"
+
+[build]
+command = "npm install && npm run build"
+
+[vars]
+OPENROUTER_API_KEY = ""
