@@ -4,7 +4,7 @@ import { openDB, type IDBPDatabase } from 'idb'
 import type { PersonEntry, PlayerProfile, CaptureSession, Achievement, Quest, GameStats } from './types'
 
 const DB_NAME = 'peopledex'
-const DB_VERSION = 2
+const DB_VERSION = 3
 const PROFILE_KEY = 'player1'
 
 // Default profile data (must be defined before getDB for upgrade handler)
@@ -55,6 +55,9 @@ function getDB(): Promise<IDBPDatabase> {
         }
         if (!db.objectStoreNames.contains('stats')) {
           db.createObjectStore('stats')
+        }
+        if (!db.objectStoreNames.contains('aiQuests')) {
+          db.createObjectStore('aiQuests', { keyPath: 'id' })
         }
       },
     })

@@ -7,9 +7,9 @@ import { levelFromXp, xpForLevel } from '@/lib/game-engine'
 import { Edit3, Save, Shield } from 'lucide-react'
 
 const R_LABELS: Record<string,{label:string;color:string}> = {
-  common:{label:'Common',color:'#737373'},uncommon:{label:'Uncommon',color:'#16a34a'},rare:{label:'Rare',color:'#2563eb'},
-  epic:{label:'Epic',color:'#7c3aed'},legendary:{label:'Legendary',color:'#ea580c'},mythic:{label:'Mythic',color:'#db2777'},
-  ultrarare:{label:'Ultra Rare',color:'#0891b2'},secret:{label:'Secret',color:'#ca8a04'},
+  common:{label:'Common',color:'#A1A1AA'},uncommon:{label:'Uncommon',color:'#10B981'},rare:{label:'Rare',color:'#6366F1'},
+  epic:{label:'Epic',color:'#A855F7'},legendary:{label:'Legendary',color:'#F59E0B'},mythic:{label:'Mythic',color:'#EC4899'},
+  ultrarare:{label:'Ultra Rare',color:'#06B6D4'},secret:{label:'Secret',color:'#FBBF24'},
 }
 
 const EMOJIS = ['🔍','📸','🎯','⭐','🔥','👑','🌈','💎','🦊','🐉','👻','🤖','🎮','🚀','🌙']
@@ -27,46 +27,63 @@ export default function ProfilePage() {
   const fav = people.find(p => p.id === profile.favoriteId)
 
   return (
-    <div className="px-4 pt-10 pb-4 space-y-6">
+    <div className="px-4 pt-12 pb-4 space-y-5">
       {/* Header card */}
-      <div className="card p-6 text-center relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-[#2563eb]/[0.03] to-transparent" />
+      <div className="glass p-6 text-center relative overflow-hidden" style={{ borderRadius: 'var(--radius-xl)' }}>
+        <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(circle at 50% 0%, rgba(99,102,241,0.08) 0%, transparent 60%)' }} />
 
-        <motion.button whileHover={{ scale: 1.08 }} whileTap={{ scale: 0.9 }}
+        <motion.button
+          whileHover={{ scale: 1.08 }}
+          whileTap={{ scale: 0.9 }}
           className="text-5xl inline-block cursor-pointer"
           onClick={() => {
             const i = EMOJIS.indexOf(profile.avatarEmoji)
             setProfile({ avatarEmoji: EMOJIS[(i + 1) % EMOJIS.length] })
-          }}>
+          }}
+        >
           {profile.avatarEmoji}
         </motion.button>
-        <p className="text-[10px] text-[#d4d0cb] mt-1">tap to change</p>
+        <p className="text-[10px] text-zinc-600 mt-1">tap to change</p>
 
         {editing ? (
           <div className="flex items-center justify-center gap-2 mt-3">
-            <input value={name} onChange={e => setName(e.target.value)} maxLength={20} autoFocus
-              className="bg-white border border-[#e6e4e0] rounded-lg px-3 py-1.5 text-sm text-[#1a1a1a] text-center w-44 focus:outline-none focus:ring-2 focus:ring-[#2563eb]/20" />
-            <button onClick={() => { setProfile({ username: name }); setEditing(false) }}
-              className="p-1.5 rounded-lg bg-[#f5f4f1] text-[#1a1a1a] hover:bg-[#e6e4e0]"><Save className="w-4 h-4" /></button>
+            <input
+              value={name} onChange={e => setName(e.target.value)} maxLength={20} autoFocus
+              className="rounded-lg px-3 py-1.5 text-sm text-zinc-100 text-center w-44 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 transition-all"
+              style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}
+            />
+            <button
+              onClick={() => { setProfile({ username: name }); setEditing(false) }}
+              className="p-1.5 rounded-lg cursor-pointer transition-colors"
+              style={{ background: 'rgba(99,102,241,0.15)', color: '#C7D2FE' }}
+            >
+              <Save className="w-4 h-4" />
+            </button>
           </div>
         ) : (
           <div className="flex items-center justify-center gap-2 mt-3">
-            <h2 className="text-xl font-bold text-[#1a1a1a]">{profile.username}</h2>
-            <button onClick={() => setEditing(true)}><Edit3 className="w-3.5 h-3.5 text-[#a3a3a3] hover:text-[#737373]" /></button>
+            <h2 className="text-xl font-bold text-zinc-100">{profile.username}</h2>
+            <button onClick={() => setEditing(true)} className="cursor-pointer"><Edit3 className="w-3.5 h-3.5 text-zinc-500 hover:text-zinc-400" /></button>
           </div>
         )}
 
-        <p className="text-xs text-[#a3a3a3] mt-1">{profile.cosmetics.title}</p>
+        <p className="text-xs text-zinc-500 mt-1">{profile.cosmetics.title}</p>
 
         <div className="mt-4">
-          <div className="flex items-center justify-between text-xs text-[#737373] mb-1">
+          <div className="flex items-center justify-between text-xs text-zinc-500 mb-1">
             <span>Level {profile.level}</span>
             <span>{lvl.currentXp.toLocaleString()} / {lvl.nextLevelXp.toLocaleString()} XP</span>
           </div>
-          <div className="h-2 rounded-full bg-[#f5f4f1] overflow-hidden">
-            <motion.div className="h-full rounded-full bg-[#1a1a1a]" initial={{ width: 0 }} animate={{ width: `${pct}%` }} transition={{ duration: 0.6 }} />
+          <div className="h-2 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
+            <motion.div
+              className="h-full rounded-full"
+              style={{ background: 'linear-gradient(90deg, #6366F1, #818CF8)' }}
+              initial={{ width: 0 }}
+              animate={{ width: `${pct}%` }}
+              transition={{ duration: 0.6, ease: 'easeOut' }}
+            />
           </div>
-          <p className="text-[10px] text-[#a3a3a3] mt-1">{xpForLevel(profile.level) - lvl.currentXp} XP to next level</p>
+          <p className="text-[10px] text-zinc-500 mt-1">{xpForLevel(profile.level) - lvl.currentXp} XP to next level</p>
         </div>
       </div>
 
@@ -78,23 +95,23 @@ export default function ProfilePage() {
           ['Day Streak', profile.currentStreak.toString()],
           ['Level', profile.level.toString()],
         ].map(([label, val]) => (
-          <div key={label} className="card p-3">
-            <div className="text-lg font-bold text-[#1a1a1a]">{val}</div>
-            <div className="text-[10px] text-[#a3a3a3]">{label}</div>
+          <div key={label} className="glass p-3">
+            <div className="text-lg font-bold text-zinc-100">{val}</div>
+            <div className="text-[10px] text-zinc-500">{label}</div>
           </div>
         ))}
       </div>
 
       {/* Rarity collection */}
-      <div className="card p-4">
-        <h2 className="text-sm font-semibold text-[#1a1a1a] mb-3">Rarity Collection</h2>
+      <div className="glass p-4">
+        <h2 className="text-sm font-semibold text-zinc-200 mb-3">Rarity Collection</h2>
         <div className="grid grid-cols-4 gap-2">
           {Object.entries(R_LABELS).map(([r,{label,color}]) => {
             const count = people.filter(p => p.rarity === r).length
             return (
               <div key={r} className="text-center">
                 <div className="text-base font-bold" style={{color}}>{count}</div>
-                <div className="text-[9px] font-medium text-[#a3a3a3]">{label}</div>
+                <div className="text-[9px] font-medium text-zinc-500">{label}</div>
               </div>
             )
           })}
@@ -103,12 +120,14 @@ export default function ProfilePage() {
 
       {/* Favorite */}
       {fav && (
-        <div className="card p-4">
-          <h2 className="text-sm font-semibold text-[#1a1a1a] mb-2">Favorite</h2>
+        <div className="glass p-4">
+          <h2 className="text-sm font-semibold text-zinc-200 mb-2">Favorite</h2>
           <div className="flex items-center gap-3">
-            <div className="w-14 h-14 rounded-xl overflow-hidden bg-[#f5f4f1]"><img src={fav.thumbnailData} alt={fav.nickname} className="w-full h-full object-cover" /></div>
+            <div className="w-14 h-14 rounded-xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.03)' }}>
+              <img src={fav.thumbnailData} alt={fav.nickname} className="w-full h-full object-cover" />
+            </div>
             <div>
-              <div className="text-sm font-semibold text-[#1a1a1a]">{fav.nickname}</div>
+              <div className="text-sm font-semibold text-zinc-100">{fav.nickname}</div>
               <div className="text-xs font-medium" style={{color: R_LABELS[fav.rarity]?.color}}>{R_LABELS[fav.rarity]?.label} · {fav.xp} XP</div>
             </div>
           </div>
@@ -116,9 +135,14 @@ export default function ProfilePage() {
       )}
 
       {/* Privacy */}
-      <div className="card p-4">
-        <div className="flex items-center gap-2 mb-2"><Shield className="w-4 h-4 text-[#16a34a]" /><h2 className="text-sm font-semibold text-[#1a1a1a]">Privacy</h2></div>
-        <p className="text-xs text-[#737373] leading-relaxed">All data stays on your device. No facial recognition. No identity matching. No uploads. Just anonymous collectibles.</p>
+      <div className="glass p-4 mb-2">
+        <div className="flex items-center gap-2 mb-2">
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'rgba(16,185,129,0.1)' }}>
+            <Shield className="w-4 h-4 text-emerald-400" />
+          </div>
+          <h2 className="text-sm font-semibold text-zinc-200">Privacy</h2>
+        </div>
+        <p className="text-xs text-zinc-500 leading-relaxed">All data stays on your device. No facial recognition. No identity matching. No uploads. Just anonymous collectibles.</p>
       </div>
     </div>
   )

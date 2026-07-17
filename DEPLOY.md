@@ -1,19 +1,27 @@
 # PeopleDex — Cloudflare Pages
 
-# Deploy via Cloudflare Pages Git integration (easiest):
-#   1. Push this repo to GitHub
-#   2. Connect repo in Cloudflare Pages dashboard
-#   3. Set:
-#      - Framework preset: Next.js
-#      - Build command: npm run build
-#      - Build output: .next
-#      - Environment variable: OPENROUTER_API_KEY = your_key
-#   4. Deploy
+## Deploy via Git (Recommended)
 
-# OR deploy manually:
-#   npm install
-#   npm run build
-#   npx wrangler pages deploy .next --branch main
+1. Push this repo to GitHub
+2. In Cloudflare Pages dashboard → Create Project → Connect your repo
+3. Configure:
+   - **Framework preset:** Next.js
+   - **Build command:** `npm run build`
+   - **Build output directory:** `out`
+   - **Environment variables:**
+     - `OPENROUTER_API_KEY` = your OpenRouter API key
+4. Deploy
 
-# Local dev:
-#   OPENROUTER_API_KEY=your_key npm run dev
+The `functions/api/` directory is auto-detected by Cloudflare Pages and will handle `/api/verify-person`, `/api/verify-quest`, `/api/generate-quests`.
+
+## Local Dev
+
+```bash
+npm run dev
+```
+
+API routes work locally because `output: "export"` is disabled in development mode. Set your API key in `.env.local`:
+
+```
+OPENROUTER_API_KEY=sk-or-v1-...
+```

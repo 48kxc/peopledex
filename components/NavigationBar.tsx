@@ -18,18 +18,29 @@ const items = [
 export default function NavigationBar() {
   const pathname = usePathname()
   return (
-    <nav className="fixed bottom-0 inset-x-0 z-40 pb-safe bg-[#faf9f7] border-t border-[#e6e4e0]">
-      <div className="flex justify-around items-center h-16">
+    <nav className="fixed bottom-0 inset-x-0 z-40 pb-safe" style={{ paddingBottom: 'env(safe-area-inset-bottom, 8px)' }}>
+      <div className="glass flex justify-around items-center h-16 px-1 mx-3 rounded-2xl" style={{ background: 'rgba(24, 24, 27, 0.85)', border: '1px solid rgba(255,255,255,0.06)' }}>
         {items.map(({ href, icon: Icon, label }) => {
           const active = pathname === href
           return (
-            <Link key={href} href={href} className="relative flex flex-col items-center justify-center flex-1 h-full">
+            <Link key={href} href={href} className="relative flex flex-col items-center justify-center flex-1 h-full cursor-pointer">
               {active && (
-                <motion.div layoutId="nav" className="absolute top-2 bottom-2 inset-x-2 rounded-xl bg-[#f0efec]"
-                  transition={{ type: 'spring', stiffness: 400, damping: 30 }} />
+                <motion.div
+                  layoutId="nav"
+                  className="absolute top-2 bottom-2 inset-x-2 rounded-xl"
+                  style={{ background: 'rgba(99, 102, 241, 0.15)', border: '1px solid rgba(99, 102, 241, 0.25)' }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                />
               )}
-              <Icon className={`w-5 h-5 relative z-10 ${active ? 'text-[#1a1a1a]' : 'text-[#a3a3a3]'}`} />
-              <span className={`text-[10px] mt-0.5 relative z-10 font-medium ${active ? 'text-[#1a1a1a]' : 'text-[#a3a3a3]'}`}>{label}</span>
+              <Icon
+                className={`w-5 h-5 relative z-10 transition-colors duration-200 ${
+                  active ? 'text-indigo-400' : 'text-zinc-500'
+                }`}
+                style={active ? { filter: 'drop-shadow(0 0 6px rgba(99, 102, 241, 0.4))' } : undefined}
+              />
+              <span className={`text-[10px] mt-0.5 relative z-10 font-medium transition-colors duration-200 ${
+                active ? 'text-indigo-300' : 'text-zinc-500'
+              }`}>{label}</span>
             </Link>
           )
         })}

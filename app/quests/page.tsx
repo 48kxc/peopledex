@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { usePeopleDex } from '@/lib/peopledex-context'
-import { CheckCircle2, Gift, Send, X, Loader2, AlertCircle, Sparkles } from 'lucide-react'
+import { CheckCircle2, Gift, Send, X, Loader2, AlertCircle, Sparkles, Lock, LockOpen, Trash2 } from 'lucide-react'
 import type { PersonEntry } from '@/lib/types'
 
 const ICONS: Record<string,string> = { daily:'📅', weekly:'📆', special:'🎯', visual:'🎨' }
@@ -24,6 +24,7 @@ interface AIQuest {
 export default function QuestsPage() {
   const { quests, claimQuest, people, profile, setProfile } = usePeopleDex()
   const [aiQuests, setAiQuests] = useState<AIQuest[]>([])
+  const [lockedIds, setLockedIds] = useState<Set<string>>(new Set())
   const [generating, setGenerating] = useState(false)
   const [submittingQuest, setSubmittingQuest] = useState<any | null>(null)
   const [selectedPhoto, setSelectedPhoto] = useState<PersonEntry | null>(null)
@@ -32,7 +33,30 @@ export default function QuestsPage() {
 
   const active = quests.filter(q => !q.claimed).sort((a,b) => (b.completed ? 1 : 0) - (a.completed ? 1 : 0))
   const done = quests.filter(q => q.claimed)
-  const totalXp = done.reduce((s,q) => s + q.xpReward, 0)
+  const aiDone = aiQuests.filter(q => q.claimed)
+  const totalXp = done.reduce((s,q) => s + q.xpReward, 0) + aiDone.reduce((s,q) => s + q.xpReward, 0)
+
+  const toggleLock = (id: string) => {
+    setLockedIds(prev => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  const removeQuest = (id: string) => {
+    setAiQuests(prev => prev.filter(q => q.id !== id))
+    setLockedIds(prev => {
+      const next = new Set(prev)
+      next.delete(id)
+      return next
+    })
+  }
+
+  const clearUnlocked = () => {
+    setAiQuests(prev => prev.filter(q => lockedIds.has(q.id) || q.claimed))
+  }
 
   const generateQuests = async () => {
     setGenerating(true)
@@ -81,6 +105,7 @@ export default function QuestsPage() {
   const completeAiQuest = () => {
     if (!submittingQuest) return
     setAiQuests(prev => prev.map(q => q.id === submittingQuest.id ? { ...q, completed: true } : q))
+    setLockedIds(prev => { const next = new Set(prev); next.delete(submittingQuest.id); return next })
     setSubmittingQuest(null); setSelectedPhoto(null); setVerifyAnswer(null)
   }
 
@@ -89,87 +114,153 @@ export default function QuestsPage() {
     if (!q || !profile) return
     setProfile({ xp: profile.xp + q.xpReward, level: Math.floor(Math.log2((profile.xp + q.xpReward) / 100 + 1)) + 1 })
     setAiQuests(prev => prev.map(x => x.id === id ? { ...x, claimed: true } : x))
+    setLockedIds(prev => { const next = new Set(prev); next.delete(id); return next })
   }
 
   const closeSubmit = () => { setSubmittingQuest(null); setSelectedPhoto(null); setVerifyAnswer(null) }
 
-  const allActive = [...aiQuests.filter(q => !q.claimed), ...active]
+  const unclaimedAi = aiQuests.filter(q => !q.claimed)
+  const unlockedUnclaimed = unclaimedAi.filter(q => !lockedIds.has(q.id))
+  const allActive = [...unclaimedAi.filter(q => lockedIds.has(q.id) || q.completed), ...unclaimedAi.filter(q => !lockedIds.has(q.id) && !q.completed), ...active]
 
   return (
-    <div className="px-4 pt-10 pb-4 space-y-6">
+    <div className="px-4 pt-12 pb-4 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-[#1a1a1a]">Quests</h1>
-          <p className="text-sm text-[#737373]">Complete quests for bonus XP</p>
+          <h1 className="text-2xl font-bold tracking-tight text-zinc-100">Quests</h1>
+          <p className="text-sm text-zinc-500">Complete quests for bonus XP</p>
         </div>
-        <button
-          onClick={generateQuests}
-          disabled={generating}
-          className="px-4 py-2 rounded-xl bg-[#1a1a1a] text-white text-xs font-semibold flex items-center gap-1.5 hover:bg-[#404040] disabled:opacity-50 transition-colors"
-        >
-          {generating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
-          Generate
-        </button>
+        <div className="flex items-center gap-1.5">
+          {unlockedUnclaimed.length > 0 && (
+            <button
+              onClick={clearUnlocked}
+              className="px-2.5 py-2 rounded-xl text-xs font-medium flex items-center gap-1 transition-colors cursor-pointer"
+              style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.15)', color: '#FCA5A5' }}
+            >
+              <Trash2 className="w-3 h-3" />
+            </button>
+          )}
+          <button
+            onClick={generateQuests}
+            disabled={generating}
+            className="px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer"
+            style={{ background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.25)', color: '#C7D2FE' }}
+          >
+            {generating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+            Generate
+          </button>
+        </div>
       </div>
 
-      <div className="card p-4 flex items-center justify-between">
+      <div className="glass p-4 flex items-center justify-between">
         <div>
-          <div className="text-xl font-bold text-[#1a1a1a]">{done.length + aiQuests.filter(q => q.claimed).length}<span className="text-sm font-normal text-[#a3a3a3]"> / {quests.length + aiQuests.length}</span></div>
-          <div className="text-xs text-[#737373]">Completed</div>
+          <div className="text-xl font-bold text-zinc-100">
+            {done.length + aiDone.length}
+            <span className="text-sm font-normal text-zinc-600"> / {quests.length + aiQuests.length}</span>
+          </div>
+          <div className="text-xs text-zinc-500">Completed</div>
         </div>
         <div className="text-right">
-          <div className="text-xl font-bold text-[#1a1a1a]">{totalXp.toLocaleString()}</div>
-          <div className="text-xs text-[#737373]">XP earned</div>
+          <div className="text-xl font-bold text-zinc-100">{totalXp.toLocaleString()}</div>
+          <div className="text-xs text-zinc-500">XP earned</div>
         </div>
       </div>
+
+      {lockedIds.size > 0 && (
+        <div className="flex items-center gap-2">
+          <Lock className="w-3 h-3 text-amber-400" />
+          <span className="text-xs text-zinc-500">{lockedIds.size} quest{lockedIds.size !== 1 ? 's' : ''} locked</span>
+        </div>
+      )}
 
       {allActive.length === 0 ? (
         <div className="text-center py-12">
-          <div className="text-3xl mb-3">🎉</div>
-          <p className="text-sm font-medium text-[#1a1a1a]">All done!</p>
-          <p className="text-xs text-[#a3a3a3] mt-0.5">Generate new quests or check back later</p>
+          <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-3" style={{ background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.15)' }}>
+            <span className="text-xl">🎉</span>
+          </div>
+          <p className="text-sm font-medium text-zinc-200">All done!</p>
+          <p className="text-xs text-zinc-500 mt-0.5">Generate new quests or check back later</p>
         </div>
       ) : (
         <div className="space-y-2">
           {allActive.map(q => {
             const isAi = q.id.startsWith('ai-')
+            const isLocked = lockedIds.has(q.id)
             return (
-              <motion.div key={q.id} className={`card p-4 ${q.completed ? 'ring-1 ring-[#fde68a]' : ''}`} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}>
+              <motion.div
+                key={q.id}
+                className={`glass p-4 ${q.completed ? 'gradient-border' : ''} ${isLocked ? '' : ''}`}
+                style={q.completed ? { borderRadius: 'var(--radius-xl)' } : isLocked ? { borderColor: 'rgba(251,191,36,0.3)' } : {}}
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+              >
                 <div className="flex items-start gap-3">
                   <span className="text-xl">{ICONS[q.category] || '🎯'}</span>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-1.5">
-                      <h3 className="text-sm font-semibold text-[#1a1a1a]">{q.title}</h3>
-                      {q.completed && <CheckCircle2 className="w-3.5 h-3.5 text-[#16a34a] shrink-0" />}
-                      {isAi && <span className="text-[9px] px-1.5 py-0.5 rounded-md bg-[#fef3c7] text-[#92400e] font-medium">AI</span>}
+                      <h3 className="text-sm font-semibold text-zinc-100">{q.title}</h3>
+                      {isLocked && <Lock className="w-3 h-3 text-amber-400 shrink-0" />}
+                      {q.completed && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />}
+                      {isAi && (
+                        <span className="text-[9px] px-1.5 py-0.5 rounded-md font-medium" style={{ background: 'rgba(99,102,241,0.15)', color: '#C7D2FE' }}>AI</span>
+                      )}
                     </div>
-                    <p className="text-xs text-[#737373] mt-0.5">{q.description}</p>
+                    <p className="text-xs text-zinc-500 mt-0.5">{q.description}</p>
 
                     {!isAi && (q.type === 'captures_today' || q.type === 'unique_encounters' || q.type === 'different_locations') ? (
                       <div className="mt-2 flex items-center gap-2">
-                        <div className="flex-1 h-1.5 rounded-full bg-[#f5f4f1] overflow-hidden">
-                          <motion.div className={`h-full rounded-full ${q.completed ? 'bg-[#f59e0b]' : 'bg-[#2563eb]'}`}
-                            initial={{ width: 0 }} animate={{ width: `${Math.min((q.progress/q.target)*100, 100)}%` }} />
+                        <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
+                          <motion.div
+                            className="h-full rounded-full"
+                            style={{ background: q.completed ? '#F59E0B' : '#6366F1' }}
+                            initial={{ width: 0 }}
+                            animate={{ width: `${Math.min((q.progress/q.target)*100, 100)}%` }}
+                          />
                         </div>
-                        <span className="text-[10px] text-[#a3a3a3] font-medium">{q.progress}/{q.target}</span>
+                        <span className="text-[10px] text-zinc-500 font-medium">{q.progress}/{q.target}</span>
                       </div>
                     ) : (
-                      <div className="mt-2">
-                        <button onClick={() => setSubmittingQuest(q)} className="text-xs font-semibold text-[#2563eb] flex items-center gap-1 hover:underline">
+                      <div className="mt-2 flex items-center gap-2">
+                        <button
+                          onClick={() => setSubmittingQuest(q)}
+                          className="text-xs font-semibold text-indigo-400 flex items-center gap-1 hover:text-indigo-300 cursor-pointer"
+                        >
                           <Send className="w-3 h-3" /> Submit photo
                         </button>
+                        {isAi && !q.completed && (
+                          <button
+                            onClick={() => toggleLock(q.id)}
+                            className="text-[10px] font-medium flex items-center gap-0.5 cursor-pointer transition-colors"
+                            style={{ color: isLocked ? '#FBBF24' : '#52525B' }}
+                          >
+                            {isLocked ? <><Lock className="w-2.5 h-2.5" /> Locked</> : <><LockOpen className="w-2.5 h-2.5" /> Lock</>}
+                          </button>
+                        )}
+                        {isAi && !q.completed && !isLocked && (
+                          <button
+                            onClick={() => removeQuest(q.id)}
+                            className="text-[10px] font-medium text-zinc-600 hover:text-red-400 flex items-center gap-0.5 cursor-pointer transition-colors"
+                          >
+                            <X className="w-2.5 h-2.5" /> Remove
+                          </button>
+                        )}
                       </div>
                     )}
                   </div>
                   <div className="text-right shrink-0">
-                    <span className="text-xs font-bold text-[#1a1a1a]">+{q.xpReward} XP</span>
+                    <span className="text-xs font-bold text-zinc-200">+{q.xpReward} XP</span>
                     {q.completed && !q.claimed ? (
-                      <motion.button onClick={() => isAi ? claimAiQuest(q.id) : claimQuest(q.id)} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
-                        className="mt-1.5 px-3 py-1 rounded-lg bg-[#fef3c7] text-[#92400e] text-xs font-semibold flex items-center gap-1">
+                      <motion.button
+                        onClick={() => isAi ? claimAiQuest(q.id) : claimQuest(q.id)}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.97 }}
+                        className="mt-1.5 px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1 cursor-pointer"
+                        style={{ background: 'rgba(251,191,36,0.15)', border: '1px solid rgba(251,191,36,0.25)', color: '#FBBF24' }}
+                      >
                         <Gift className="w-3 h-3" /> Claim
                       </motion.button>
                     ) : q.completed && q.claimed ? (
-                      <CheckCircle2 className="w-4 h-4 text-[#16a34a] mt-1.5 ml-auto" />
+                      <CheckCircle2 className="w-4 h-4 text-emerald-400 mt-1.5 ml-auto" />
                     ) : null}
                   </div>
                 </div>
@@ -183,26 +274,34 @@ export default function QuestsPage() {
       <AnimatePresence>
         {submittingQuest && (
           <motion.div className="fixed inset-0 z-50 flex items-end justify-center pb-8" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-            <div className="absolute inset-0 bg-black/40" onClick={closeSubmit} />
-            <motion.div className="relative w-full max-w-sm bg-white rounded-2xl overflow-hidden shadow-2xl max-h-[80vh] flex flex-col"
-              initial={{ y: 200 }} animate={{ y: 0 }} exit={{ y: 200 }} transition={{ type: 'spring', damping: 25, stiffness: 300 }}>
-              <div className="p-4 border-b border-[#e6e4e0] flex items-center justify-between">
+            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={closeSubmit} />
+            <motion.div
+              className="relative w-full max-w-sm rounded-2xl overflow-hidden shadow-2xl max-h-[80vh] flex flex-col"
+              style={{ background: 'rgba(24,24,27,0.95)', border: '1px solid rgba(255,255,255,0.08)', backdropFilter: 'blur(20px)' }}
+              initial={{ y: 200 }} animate={{ y: 0 }} exit={{ y: 200 }} transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+            >
+              <div className="p-4 flex items-center justify-between" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
                 <div>
-                  <h3 className="text-sm font-semibold text-[#1a1a1a]">{submittingQuest.title}</h3>
-                  <p className="text-xs text-[#737373]">{submittingQuest.description}</p>
+                  <h3 className="text-sm font-semibold text-zinc-100">{submittingQuest.title}</h3>
+                  <p className="text-xs text-zinc-500">{submittingQuest.description}</p>
                 </div>
-                <button onClick={closeSubmit}><X className="w-5 h-5 text-[#a3a3a3]" /></button>
+                <button onClick={closeSubmit} className="cursor-pointer"><X className="w-5 h-5 text-zinc-500" /></button>
               </div>
               {!selectedPhoto ? (
                 <div className="flex-1 overflow-y-auto p-4">
-                  <p className="text-xs text-[#737373] mb-3">Pick a photo from your collection:</p>
+                  <p className="text-xs text-zinc-500 mb-3">Pick a photo from your collection:</p>
                   {people.length === 0 ? (
-                    <p className="text-sm text-[#a3a3a3] text-center py-8">No photos yet. Capture some first!</p>
+                    <p className="text-sm text-zinc-500 text-center py-8">No photos yet. Capture some first!</p>
                   ) : (
                     <div className="grid grid-cols-3 gap-2">
                       {people.map(p => (
-                        <button key={p.id} onClick={() => setSelectedPhoto(p)}
-                          className="aspect-square rounded-xl overflow-hidden bg-[#f5f4f1] ring-2 ring-transparent hover:ring-[#2563eb] transition-all">
+                        <button
+                          key={p.id} onClick={() => setSelectedPhoto(p)}
+                          className="aspect-square rounded-xl overflow-hidden cursor-pointer transition-all"
+                          style={{ background: 'rgba(255,255,255,0.03)', border: '2px solid transparent' }}
+                          onMouseEnter={e => (e.currentTarget.style.borderColor = 'rgba(99,102,241,0.4)')}
+                          onMouseLeave={e => (e.currentTarget.style.borderColor = 'transparent')}
+                        >
                           <img src={p.thumbnailData} alt={p.nickname} className="w-full h-full object-cover" />
                         </button>
                       ))}
@@ -212,31 +311,40 @@ export default function QuestsPage() {
               ) : (
                 <div className="flex-1 overflow-y-auto p-4">
                   <div className="flex items-center gap-3 mb-3">
-                    <div className="w-16 h-16 rounded-xl overflow-hidden bg-[#f5f4f1]"><img src={selectedPhoto.thumbnailData} alt="" className="w-full h-full object-cover" /></div>
+                    <div className="w-16 h-16 rounded-xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.03)' }}>
+                      <img src={selectedPhoto.thumbnailData} alt="" className="w-full h-full object-cover" />
+                    </div>
                     <div>
-                      <div className="text-sm font-semibold text-[#1a1a1a]">{selectedPhoto.nickname}</div>
-                      <button onClick={() => setSelectedPhoto(null)} className="text-xs text-[#2563eb]">Change</button>
+                      <div className="text-sm font-semibold text-zinc-100">{selectedPhoto.nickname}</div>
+                      <button onClick={() => setSelectedPhoto(null)} className="text-xs text-indigo-400 cursor-pointer">Change</button>
                     </div>
                   </div>
                   {verifyAnswer === null ? (
-                    <button onClick={handleSubmitQuest} disabled={verifying}
-                      className="w-full py-2.5 rounded-xl bg-[#2563eb] text-white text-sm font-semibold flex items-center justify-center gap-2 hover:bg-[#1d4ed8] disabled:opacity-60">
+                    <button
+                      onClick={handleSubmitQuest}
+                      disabled={verifying}
+                      className="w-full py-2.5 rounded-xl text-white text-sm font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer"
+                      style={{ background: 'rgba(99,102,241,0.8)' }}
+                    >
                       {verifying ? <><Loader2 className="w-4 h-4 animate-spin" /> Checking...</> : <><Send className="w-4 h-4" /> Submit for Verification</>}
                     </button>
                   ) : verifyAnswer === 'YES' ? (
-                    <div className="bg-[#f0fdf4] border border-[#bbf7d0] rounded-xl p-4">
-                      <div className="flex items-center gap-2 text-[#16a34a] mb-2"><CheckCircle2 className="w-5 h-5" /><span className="text-sm font-bold">Quest completed!</span></div>
-                      <p className="text-xs text-[#737373]">AI confirms this photo satisfies the quest.</p>
-                      <button onClick={completeAiQuest} className="mt-3 w-full py-2.5 rounded-xl bg-[#16a34a] text-white text-sm font-semibold flex items-center justify-center gap-1.5">
+                    <div className="rounded-xl p-4" style={{ background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.2)' }}>
+                      <div className="flex items-center gap-2 text-emerald-400 mb-2"><CheckCircle2 className="w-5 h-5" /><span className="text-sm font-bold">Quest completed!</span></div>
+                      <p className="text-xs text-zinc-400 mb-3">AI confirms this photo satisfies the quest.</p>
+                      <button onClick={completeAiQuest}
+                        className="w-full py-2.5 rounded-xl text-white text-sm font-semibold flex items-center justify-center gap-1.5 cursor-pointer"
+                        style={{ background: 'rgba(16,185,129,0.8)' }}>
                         <Gift className="w-4 h-4" /> Complete & Claim +{submittingQuest.xpReward} XP
                       </button>
                     </div>
                   ) : (
-                    <div className="bg-[#fef2f2] border border-[#fecaca] rounded-xl p-4">
-                      <div className="flex items-center gap-2 text-[#dc2626] mb-2"><AlertCircle className="w-5 h-5" /><span className="text-sm font-bold">Not a match</span></div>
-                      <p className="text-xs text-[#737373]">AI doesn't see the required element. Try another photo.</p>
+                    <div className="rounded-xl p-4" style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)' }}>
+                      <div className="flex items-center gap-2 text-red-400 mb-2"><AlertCircle className="w-5 h-5" /><span className="text-sm font-bold">Not a match</span></div>
+                      <p className="text-xs text-zinc-400 mb-3">AI doesn't see the required element. Try another photo.</p>
                       <button onClick={() => { setSelectedPhoto(null); setVerifyAnswer(null) }}
-                        className="mt-3 w-full py-2.5 rounded-xl border border-[#fecaca] text-[#dc2626] text-sm font-semibold">Try another</button>
+                        className="w-full py-2.5 rounded-xl text-sm font-semibold cursor-pointer"
+                        style={{ border: '1px solid rgba(239,68,68,0.3)', color: '#EF4444' }}>Try another</button>
                     </div>
                   )}
                 </div>
@@ -246,15 +354,22 @@ export default function QuestsPage() {
         )}
       </AnimatePresence>
 
-      {done.length > 0 && (
+      {(done.length > 0 || aiDone.length > 0) && (
         <div>
-          <h2 className="text-xs font-semibold text-[#a3a3a3] uppercase tracking-wide mb-2">Completed</h2>
+          <h2 className="text-xs font-semibold text-zinc-600 uppercase tracking-wide mb-2">Completed</h2>
           <div className="space-y-1">
             {done.map(q => (
               <div key={q.id} className="flex items-center gap-2 px-3 py-2 rounded-lg">
-                <CheckCircle2 className="w-3 h-3 text-[#d4d0cb]" />
-                <span className="text-xs text-[#a3a3a3]">{q.title}</span>
-                <span className="text-[10px] text-[#d4d0cb] ml-auto">+{q.xpReward} XP</span>
+                <CheckCircle2 className="w-3 h-3 text-zinc-700" />
+                <span className="text-xs text-zinc-500">{q.title}</span>
+                <span className="text-[10px] text-zinc-700 ml-auto">+{q.xpReward} XP</span>
+              </div>
+            ))}
+            {aiDone.map(q => (
+              <div key={q.id} className="flex items-center gap-2 px-3 py-2 rounded-lg">
+                <CheckCircle2 className="w-3 h-3 text-zinc-700" />
+                <span className="text-xs text-zinc-500">{q.title}</span>
+                <span className="text-[10px] text-zinc-700 ml-auto">+{q.xpReward} XP</span>
               </div>
             ))}
           </div>

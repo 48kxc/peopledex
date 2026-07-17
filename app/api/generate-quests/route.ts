@@ -1,16 +1,14 @@
-// Cloudflare Pages Function — POST /api/generate-quests
-// Calls OpenRouter to generate creative person-focused quests with variable XP
+import { NextResponse } from 'next/server'
 
-export async function onRequestPost(context: any) {
-  const apiKey = context.env.OPENROUTER_API_KEY
-  if (!apiKey) {
-    return new Response(JSON.stringify({ error: 'OPENROUTER_API_KEY not set' }), { status: 500, headers: { 'Content-Type': 'application/json' } })
-  }
+const API_KEY = process.env.OPENROUTER_API_KEY
+
+export async function POST() {
+  if (!API_KEY) return NextResponse.json({ error: 'OPENROUTER_API_KEY not set' }, { status: 500 })
 
   try {
     const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
-      headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+      headers: { 'Authorization': `Bearer ${API_KEY}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model: 'google/gemma-3-12b-it',
         messages: [{
@@ -32,15 +30,15 @@ Return STRICT JSON array only, no markdown, no code blocks:
       }),
     })
 
-    if (!res.ok) return new Response(JSON.stringify({ error: `OpenRouter ${res.status}` }), { status: 502, headers: { 'Content-Type': 'application/json' } })
+    if (!res.ok) return NextResponse.json({ error: `OpenRouter ${res.status}` }, { status: 502 })
 
     const data: any = await res.json()
     const content = data.choices?.[0]?.message?.content || ''
     let quests: any[] = []
     try { const m = content.match(/\[[\s\S]*\]/); if (m) quests = JSON.parse(m[0]) } catch {}
 
-    return new Response(JSON.stringify({ quests }), { headers: { 'Content-Type': 'application/json' } })
+    return NextResponse.json({ quests })
   } catch (e: any) {
-    return new Response(JSON.stringify({ error: e.message }), { status: 502, headers: { 'Content-Type': 'application/json' } })
+    return NextResponse.json({ error: e.message }, { status: 502 })
   }
 }

@@ -6,9 +6,9 @@ import { levelFromXp } from '@/lib/game-engine'
 import { Users, Zap, Trophy, MapPin } from 'lucide-react'
 
 const R_LABELS: Record<string,{label:string;color:string}> = {
-  common:{label:'Common',color:'#737373'},uncommon:{label:'Uncommon',color:'#16a34a'},rare:{label:'Rare',color:'#2563eb'},
-  epic:{label:'Epic',color:'#7c3aed'},legendary:{label:'Legendary',color:'#ea580c'},mythic:{label:'Mythic',color:'#db2777'},
-  ultrarare:{label:'Ultra Rare',color:'#0891b2'},secret:{label:'Secret',color:'#ca8a04'},
+  common:{label:'Common',color:'#A1A1AA'},uncommon:{label:'Uncommon',color:'#10B981'},rare:{label:'Rare',color:'#6366F1'},
+  epic:{label:'Epic',color:'#A855F7'},legendary:{label:'Legendary',color:'#F59E0B'},mythic:{label:'Mythic',color:'#EC4899'},
+  ultrarare:{label:'Ultra Rare',color:'#06B6D4'},secret:{label:'Secret',color:'#FBBF24'},
 }
 
 export default function StatsPage() {
@@ -27,10 +27,10 @@ export default function StatsPage() {
   const achDone = achievements.filter(a => a.completed).length
 
   return (
-    <div className="px-4 pt-10 pb-4 space-y-6">
+    <div className="px-4 pt-12 pb-4 space-y-5">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-[#1a1a1a]">Statistics</h1>
-        <p className="text-sm text-[#737373]">Your collection data</p>
+        <h1 className="text-2xl font-bold tracking-tight text-zinc-100">Statistics</h1>
+        <p className="text-sm text-zinc-500">Your collection data</p>
       </div>
 
       <div className="grid grid-cols-2 gap-2">
@@ -43,8 +43,8 @@ export default function StatsPage() {
       </div>
 
       {/* Rarity */}
-      <div className="card p-4">
-        <h2 className="text-sm font-semibold text-[#1a1a1a] mb-3">Rarity Distribution</h2>
+      <div className="glass p-4">
+        <h2 className="text-sm font-semibold text-zinc-200 mb-3">Rarity Distribution</h2>
         <div className="space-y-2">
           {entries.map(([r,c]) => {
             const pct = (c/totalR)*100
@@ -52,10 +52,10 @@ export default function StatsPage() {
             return (
               <div key={r} className="flex items-center gap-2">
                 <span className="text-xs font-medium w-20" style={{color:cl.color}}>{cl.label}</span>
-                <div className="flex-1 h-2 rounded-full bg-[#f5f4f1] overflow-hidden">
+                <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
                   <motion.div className="h-full rounded-full" style={{backgroundColor:cl.color,width:`${pct}%`}} initial={{ width: 0 }} animate={{ width: `${pct}%` }} transition={{ duration: 0.5 }} />
                 </div>
-                <span className="text-xs text-[#a3a3a3] w-6 text-right">{c}</span>
+                <span className="text-xs text-zinc-500 w-6 text-right">{c}</span>
               </div>
             )
           })}
@@ -63,40 +63,51 @@ export default function StatsPage() {
       </div>
 
       {/* Hourly */}
-      <div className="card p-4">
-        <h2 className="text-sm font-semibold text-[#1a1a1a] mb-3">Capture Time <span className="text-xs font-normal text-[#a3a3a3] ml-1">Peak: {peakH >= 0 ? `${peakH}:00` : 'N/A'}</span></h2>
+      <div className="glass p-4">
+        <h2 className="text-sm font-semibold text-zinc-200 mb-3">
+          Capture Time
+          <span className="text-xs font-normal text-zinc-500 ml-1">Peak: {peakH >= 0 ? `${peakH}:00` : 'N/A'}</span>
+        </h2>
         <div className="flex items-end gap-[2px] h-20">
           {stats.capturesByHour.map((c, h) => {
             const hh = maxH > 0 ? (c/maxH)*100 : 0
-            return <div key={h} className="flex-1 flex flex-col items-center gap-0.5">
-              <motion.div className="w-full rounded-t-sm bg-[#1a1a1a]" initial={{ height: 0 }} animate={{ height: `${Math.max(hh, 1)}%` }} transition={{ duration: 0.3, delay: h*0.005 }} />
-              {h % 6 === 0 && <span className="text-[8px] text-[#d4d0cb]">{h}</span>}
-            </div>
+            return (
+              <div key={h} className="flex-1 flex flex-col items-center gap-0.5">
+                <motion.div
+                  className="w-full rounded-t-sm"
+                  style={{ background: h === peakH ? '#6366F1' : 'rgba(99,102,241,0.3)' }}
+                  initial={{ height: 0 }}
+                  animate={{ height: `${Math.max(hh, 1)}%` }}
+                  transition={{ duration: 0.3, delay: h * 0.005 }}
+                />
+                {h % 6 === 0 && <span className="text-[8px] text-zinc-600">{h}</span>}
+              </div>
+            )
           })}
         </div>
       </div>
 
-      {/* Streaks */}
-      <div className="grid grid-cols-2 gap-2">
-        <div className="card p-4">
-          <div className="text-xs text-[#737373] mb-1">Current Streak</div>
-          <div className="text-xl font-bold text-[#ea580c]">{profile.currentStreak} 🔥</div>
-          <div className="text-[10px] text-[#a3a3a3]">days</div>
+      {/* Streaks & extras */}
+      <div className="grid grid-cols-2 gap-2 pb-2">
+        <div className="glass p-4">
+          <div className="text-xs text-zinc-500 mb-1">Current Streak</div>
+          <div className="text-xl font-bold text-amber-400">{profile.currentStreak} 🔥</div>
+          <div className="text-[10px] text-zinc-500">days</div>
         </div>
-        <div className="card p-4">
-          <div className="text-xs text-[#737373] mb-1">Longest Streak</div>
-          <div className="text-xl font-bold text-[#f59e0b]">{profile.longestStreak} ⭐</div>
-          <div className="text-[10px] text-[#a3a3a3]">days</div>
+        <div className="glass p-4">
+          <div className="text-xs text-zinc-500 mb-1">Longest Streak</div>
+          <div className="text-xl font-bold text-amber-400">{profile.longestStreak} ⭐</div>
+          <div className="text-[10px] text-zinc-500">days</div>
         </div>
-        <div className="card p-4">
-          <div className="text-xs text-[#737373] mb-1">Locations</div>
-          <div className="text-xl font-bold text-[#16a34a]">{stats.locationCount} 📍</div>
-          <div className="text-[10px] text-[#a3a3a3]">visited</div>
+        <div className="glass p-4">
+          <div className="text-xs text-zinc-500 mb-1">Locations</div>
+          <div className="text-xl font-bold text-emerald-400">{stats.locationCount} 📍</div>
+          <div className="text-[10px] text-zinc-500">visited</div>
         </div>
-        <div className="card p-4">
-          <div className="text-xs text-[#737373] mb-1">Achievements</div>
-          <div className="text-xl font-bold text-[#7c3aed]">{achDone} 🏆</div>
-          <div className="text-[10px] text-[#a3a3a3]">unlocked</div>
+        <div className="glass p-4">
+          <div className="text-xs text-zinc-500 mb-1">Achievements</div>
+          <div className="text-xl font-bold text-purple-400">{achDone} 🏆</div>
+          <div className="text-[10px] text-zinc-500">unlocked</div>
         </div>
       </div>
     </div>
@@ -105,10 +116,10 @@ export default function StatsPage() {
 
 function StatCard({ icon: Icon, label, value }: { icon: any, label: string, value: string }) {
   return (
-    <div className="card p-3">
-      <Icon className="w-4 h-4 text-[#a3a3a3] mb-1" />
-      <div className="text-base font-bold text-[#1a1a1a]">{value}</div>
-      <div className="text-[10px] text-[#a3a3a3]">{label}</div>
+    <div className="glass p-3">
+      <Icon className="w-4 h-4 text-zinc-500 mb-1" />
+      <div className="text-base font-bold text-zinc-100">{value}</div>
+      <div className="text-[10px] text-zinc-500">{label}</div>
     </div>
   )
 }
