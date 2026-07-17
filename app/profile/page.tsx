@@ -27,7 +27,7 @@ export default function ProfilePage() {
   const fav = people.find(p => p.id === profile.favoriteId)
 
   return (
-    <div className="px-4 pt-12 pb-4 space-y-5">
+    <div className="screen-shell space-y-5">
       {/* Header card */}
       <div className="glass p-6 text-center relative overflow-hidden" style={{ borderRadius: 'var(--radius-xl)' }}>
         <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(circle at 50% 0%, rgba(99,102,241,0.08) 0%, transparent 60%)' }} />

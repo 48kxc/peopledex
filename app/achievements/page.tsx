@@ -22,10 +22,11 @@ export default function AchievementsPage() {
   })
 
   return (
-    <div className="px-4 pt-12 pb-4 space-y-6">
+    <div className="screen-shell space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-zinc-100">Achievements</h1>
-        <p className="text-sm text-zinc-500">{completed}/{total} unlocked</p>
+        <p className="eyebrow mb-4">Milestones / progress log</p>
+        <h1 className="screen-title">The <em>milestones.</em></h1>
+        <p className="mt-4 text-sm text-[#92988a]">{completed}/{total} unlocked · keep going, quietly</p>
       </div>
 
       {/* Progress ring */}

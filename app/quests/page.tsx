@@ -124,11 +124,12 @@ export default function QuestsPage() {
   const allActive = [...unclaimedAi.filter(q => lockedIds.has(q.id) || q.completed), ...unclaimedAi.filter(q => !lockedIds.has(q.id) && !q.completed), ...active]
 
   return (
-    <div className="px-4 pt-12 pb-4 space-y-6">
+    <div className="screen-shell space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-zinc-100">Quests</h1>
-          <p className="text-sm text-zinc-500">Complete quests for bonus XP</p>
+          <p className="eyebrow mb-4">Field notes / active prompts</p>
+          <h1 className="screen-title">Your <em>next move.</em></h1>
+          <p className="mt-4 text-sm text-[#92988a]">Complete small observations. Turn them into momentum.</p>
         </div>
         <div className="flex items-center gap-1.5">
           {unlockedUnclaimed.length > 0 && (

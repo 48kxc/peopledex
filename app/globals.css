@@ -67,7 +67,8 @@
   body {
     @apply bg-background text-foreground antialiased;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
-    background-image: radial-gradient(circle at 80% -10%, rgba(216, 243, 106, 0.09), transparent 34rem), radial-gradient(circle at 0% 100%, rgba(143, 199, 255, 0.05), transparent 28rem);
+    background-image: radial-gradient(circle at 80% -10%, rgba(216, 243, 106, 0.11), transparent 34rem), radial-gradient(circle at 0% 100%, rgba(143, 199, 255, 0.07), transparent 28rem), linear-gradient(120deg, rgba(255,255,255,.015) 1px, transparent 1px), linear-gradient(30deg, rgba(255,255,255,.012) 1px, transparent 1px);
+    background-size: auto, auto, 72px 72px, 72px 72px;
   }
   button, a, input, select { -webkit-tap-highlight-color: transparent; }
 }
@@ -90,6 +91,30 @@
 .eyebrow { color: var(--lime); font-family: var(--font-mono), monospace; font-size: 0.66rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; }
 .mono { font-family: var(--font-mono), monospace; }
 .text-shimmer { color: var(--paper); }
+
+.screen-shell { width: min(100% - 2.5rem, 1180px); margin: 0 auto; padding: 2.4rem 0 4rem; }
+.screen-title { font-size: clamp(2.3rem, 5vw, 4.8rem); font-weight: 800; letter-spacing: -.08em; line-height: .92; color: var(--paper); }
+.screen-title em { color: var(--lime); font-style: normal; }
+.signal-line { position: relative; height: 1px; overflow: visible; background: linear-gradient(90deg, var(--lime), rgba(216,243,106,.18), transparent); }
+.signal-line::after { content: ''; position: absolute; left: 20%; top: -3px; width: 7px; height: 7px; border-radius: 999px; background: var(--lime); box-shadow: 0 0 18px 5px rgba(216,243,106,.3); }
+
+.orbit-field { position: relative; min-height: 390px; overflow: hidden; border: 1px solid rgba(244,241,232,.14); border-radius: 2rem; background: #171b15; isolation: isolate; }
+.orbit-field__wash { position: absolute; inset: -20%; background: radial-gradient(circle at center, rgba(216,243,106,.13), transparent 29%), radial-gradient(circle at 85% 20%, rgba(143,199,255,.11), transparent 22%); filter: blur(10px); }
+.orbit-field__grid { position: absolute; inset: 0; opacity: .28; background-image: linear-gradient(rgba(244,241,232,.08) 1px, transparent 1px), linear-gradient(90deg, rgba(244,241,232,.08) 1px, transparent 1px); background-size: 52px 52px; mask-image: radial-gradient(circle, #000 20%, transparent 78%); }
+.orbit { position: absolute; left: 50%; top: 50%; border: 1px solid rgba(216,243,106,.2); border-radius: 50%; transform: translate(-50%,-50%); }
+.orbit--one { width: 250px; height: 250px; border-style: dashed; }
+.orbit--two { width: 430px; height: 430px; border-color: rgba(143,199,255,.15); }
+.orbit-field__core { position: absolute; left: 50%; top: 50%; display: flex; width: 128px; height: 128px; flex-direction: column; align-items: center; justify-content: center; border: 1px solid rgba(216,243,106,.48); border-radius: 50%; background: rgba(216,243,106,.08); box-shadow: 0 0 55px rgba(216,243,106,.12), inset 0 0 25px rgba(216,243,106,.06); transform: translate(-50%,-50%); }
+.orbit-field__core span { font-size: 2.6rem; font-weight: 600; letter-spacing: -.1em; color: var(--paper); }
+.orbit-field__core small { color: #92988a; font-size: .62rem; letter-spacing: .1em; text-transform: uppercase; }
+.field-point { position: absolute; display: flex; align-items: center; gap: 7px; color: #aeb5a4; font: 10px var(--font-mono), monospace; text-transform: uppercase; letter-spacing: .08em; white-space: nowrap; }
+.field-point span { width: 7px; height: 7px; border-radius: 50%; background: var(--lime); box-shadow: 0 0 16px 4px rgba(216,243,106,.35); }
+.field-point--blue span { background: var(--blue); box-shadow: 0 0 16px 4px rgba(143,199,255,.35); }
+.field-point--orange span { background: var(--orange); box-shadow: 0 0 16px 4px rgba(241,154,98,.35); }
+.orbit-field__readout { position: absolute; inset: auto 20px 18px; display: flex; justify-content: space-between; color: #70786c; font-size: 9px; letter-spacing: .1em; }
+.live-dot { color: var(--lime); }
+
+@media (max-width: 640px) { .screen-shell { width: min(100% - 2rem, 1180px); padding-top: 1.7rem; } .orbit-field { min-height: 310px; } .orbit--two { width: 330px; height: 330px; } .orbit-field__readout span:not(.live-dot) { display: none; } }
 
 @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
 @keyframes glowPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(216,243,106,.08); } 50% { box-shadow: 0 0 0 7px rgba(216,243,106,.02); } }

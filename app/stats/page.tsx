@@ -27,10 +27,11 @@ export default function StatsPage() {
   const achDone = achievements.filter(a => a.completed).length
 
   return (
-    <div className="px-4 pt-12 pb-4 space-y-5">
+    <div className="screen-shell space-y-5">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-zinc-100">Statistics</h1>
-        <p className="text-sm text-zinc-500">Your collection data</p>
+        <p className="eyebrow mb-4">Pattern library / data readout</p>
+        <h1 className="screen-title">The <em>shape</em> of it.</h1>
+        <p className="mt-4 text-sm text-[#92988a]">Your collection, translated into signals.</p>
       </div>
 
       <div className="grid grid-cols-2 gap-2">

@@ -3,104 +3,18 @@
 import { motion } from 'framer-motion'
 import type { PersonEntry } from '@/lib/types'
 import { usePeopleDex } from '@/lib/peopledex-context'
-import { X, Trash2, Star, Calendar, MapPin, Zap, Hash } from 'lucide-react'
+import { ArrowUpRight, Calendar, Hash, MapPin, Star, Trash2, X, Zap } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 
-const R_LABELS: Record<string, { label: string; color: string }> = {
-  common:    { label: 'Common',    color: '#A1A1AA' },
-  uncommon:  { label: 'Uncommon',  color: '#10B981' },
-  rare:      { label: 'Rare',      color: '#6366F1' },
-  epic:      { label: 'Epic',      color: '#A855F7' },
-  legendary: { label: 'Legendary', color: '#F59E0B' },
-  mythic:    { label: 'Mythic',    color: '#EC4899' },
-  ultrarare: { label: 'Ultra Rare', color: '#06B6D4' },
-  secret:    { label: 'Secret',    color: '#FBBF24' },
-}
+const R_LABELS: Record<string, { label: string; color: string }> = { common: { label: 'Common', color: '#aeb5a4' }, uncommon: { label: 'Uncommon', color: '#d8f36a' }, rare: { label: 'Rare', color: '#8fc7ff' }, epic: { label: 'Epic', color: '#dca5ff' }, legendary: { label: 'Legendary', color: '#f19a62' }, mythic: { label: 'Mythic', color: '#ff8bbd' }, ultrarare: { label: 'Ultra Rare', color: '#79e2d4' }, secret: { label: 'Secret', color: '#ffe08a' } }
 
-interface Props { person: PersonEntry; onClose: () => void }
-
-export default function PersonDetail({ person, onClose }: Props) {
-  const { deletePerson, toggleFavorite } = usePeopleDex()
-  const r = R_LABELS[person.rarity] || R_LABELS.common
-
-  return (
-    <motion.div className="fixed inset-0 z-50 flex items-center justify-center p-4" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose}>
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
-      <motion.div
-        className="relative w-full max-w-sm rounded-2xl overflow-hidden shadow-2xl"
-        style={{ background: 'rgba(24,24,27,0.95)', border: '1px solid rgba(255,255,255,0.08)', backdropFilter: 'blur(20px)' }}
-        initial={{ scale: 0.95, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.95, y: 20 }}
-        transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-        onClick={e => e.stopPropagation()}
-      >
-        <button
-          onClick={onClose}
-          className="absolute top-3 right-3 z-10 p-2 rounded-full cursor-pointer transition-colors"
-          style={{ background: 'rgba(255,255,255,0.06)', color: '#A1A1AA' }}
-        >
-          <X className="w-4 h-4" />
-        </button>
-
-        <div className="aspect-[4/3] relative" style={{ background: 'rgba(255,255,255,0.02)' }}>
-          <img src={person.imageData} alt={person.nickname} className="w-full h-full object-cover" />
-          <div
-            className="absolute top-3 left-3 px-2.5 py-1 rounded-lg text-xs font-bold"
-            style={{ background: 'rgba(9,9,11,0.85)', color: r.color, backdropFilter: 'blur(8px)' }}
-          >
-            {r.label}
-          </div>
-          <button
-            onClick={() => toggleFavorite(person.id)}
-            className="absolute top-3 left-24 p-2 rounded-full cursor-pointer transition-colors"
-            style={{ background: 'rgba(9,9,11,0.85)', backdropFilter: 'blur(8px)' }}
-          >
-            <Star className={`w-4 h-4 ${person.favorite ? 'fill-amber-400 text-amber-400' : 'text-zinc-400'}`} />
-          </button>
-        </div>
-
-        <div className="p-5 space-y-4">
-          <div>
-            <h2 className="text-lg font-bold text-zinc-100">{person.nickname}</h2>
-            <p className="text-xs text-zinc-500">#{person.id.slice(-6)}</p>
-          </div>
-
-          <div className="grid grid-cols-2 gap-2">
-            <div className="rounded-xl p-3" style={{ background: 'rgba(255,255,255,0.03)' }}>
-              <div className="flex items-center gap-1 text-[10px] text-zinc-500 mb-0.5"><Calendar className="w-3 h-3" />Captured</div>
-              <div className="text-sm font-medium text-zinc-200">{new Date(person.capturedAt).toLocaleDateString()}</div>
-            </div>
-            <div className="rounded-xl p-3" style={{ background: 'rgba(255,255,255,0.03)' }}>
-              <div className="flex items-center gap-1 text-[10px] text-zinc-500 mb-0.5"><Hash className="w-3 h-3" />Encounters</div>
-              <div className="text-sm font-medium text-zinc-200">{person.encounterCount}</div>
-            </div>
-            <div className="rounded-xl p-3" style={{ background: 'rgba(255,255,255,0.03)' }}>
-              <div className="flex items-center gap-1 text-[10px] text-zinc-500 mb-0.5"><Zap className="w-3 h-3" />XP</div>
-              <div className="text-sm font-bold" style={{ color: r.color }}>{person.xp} XP</div>
-            </div>
-            {person.location && (
-              <div className="rounded-xl p-3" style={{ background: 'rgba(255,255,255,0.03)' }}>
-                <div className="flex items-center gap-1 text-[10px] text-zinc-500 mb-0.5"><MapPin className="w-3 h-3" />Location</div>
-                <div className="text-xs text-zinc-300 truncate">{person.location.latitude.toFixed(2)}, {person.location.longitude.toFixed(2)}</div>
-              </div>
-            )}
-          </div>
-
-          {person.tags.length > 0 && (
-            <div className="flex flex-wrap gap-1.5">
-              {person.tags.map(t => (
-                <span key={t} className="text-[11px] px-2 py-1 rounded-lg" style={{ background: 'rgba(255,255,255,0.04)', color: '#A1A1AA' }}>{t}</span>
-              ))}
-            </div>
-          )}
-
-          <button
-            onClick={() => { deletePerson(person.id); onClose() }}
-            className="w-full py-2.5 rounded-xl text-sm font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
-            style={{ border: '1px solid rgba(239,68,68,0.2)', color: '#EF4444' }}
-          >
-            <Trash2 className="w-4 h-4" /> Delete
-          </button>
-        </div>
-      </motion.div>
-    </motion.div>
-  )
+export default function PersonDetail({ person, onClose }: { person: PersonEntry; onClose: () => void }) {
+  const { deletePerson, toggleFavorite } = usePeopleDex(); const r = R_LABELS[person.rarity] || R_LABELS.common
+  const details: Array<[LucideIcon, string, string]> = [[Calendar, 'Captured', new Date(person.capturedAt).toLocaleDateString()], [Hash, 'Encounters', String(person.encounterCount)], [Zap, 'XP earned', `${person.xp} XP`]]
+  if (person.location) details.push([MapPin, 'Coordinates', `${person.location.latitude.toFixed(2)}, ${person.location.longitude.toFixed(2)}`])
+  return <motion.div className="fixed inset-0 z-50 flex items-center justify-center p-4" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose}><div className="absolute inset-0 bg-[#050604]/80 backdrop-blur-xl" /><motion.div className="relative grid w-full max-w-3xl overflow-hidden rounded-[1.7rem] border border-white/15 bg-[#171b15] shadow-2xl md:grid-cols-[1.05fr_.95fr]" initial={{ scale: .94, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: .94, y: 20 }} transition={{ type: 'spring', damping: 25, stiffness: 300 }} onClick={e => e.stopPropagation()}>
+    <button onClick={onClose} aria-label="Close" className="absolute right-4 top-4 z-10 rounded-full border border-white/15 bg-[#111310]/70 p-2 text-[#aeb5a4] hover:text-[#f4f1e8]"><X className="h-4 w-4" /></button>
+    <div className="relative min-h-[360px] bg-[#242921]"><img src={person.imageData} alt={person.nickname} className="absolute inset-0 h-full w-full object-cover" /><div className="absolute inset-0 bg-gradient-to-t from-[#111310] via-transparent to-[#111310]/20" /><div className="absolute bottom-5 left-5"><div className="eyebrow" style={{ color: r.color }}>{r.label} sighting</div><h2 className="mt-2 text-4xl font-bold tracking-[-.08em] text-[#f4f1e8]">{person.nickname}</h2></div><button onClick={() => toggleFavorite(person.id)} aria-label="Toggle favorite" className="absolute bottom-5 right-5 rounded-full border border-white/15 bg-[#111310]/70 p-3 backdrop-blur"><Star className={`h-5 w-5 ${person.favorite ? 'fill-[#f19a62] text-[#f19a62]' : 'text-[#f4f1e8]'}`} /></button></div>
+    <div className="flex flex-col p-6 md:p-8"><div className="mono text-[10px] uppercase tracking-[.18em] text-[#92988a]">Archive record / #{person.id.slice(-8)}</div><p className="mt-4 text-sm leading-6 text-[#aeb5a4]">A small moment, held still. This entry has crossed your path {person.encounterCount} time{person.encounterCount === 1 ? '' : 's'}.</p><div className="mt-8 grid grid-cols-2 gap-2">{details.map(([Icon, label, value]) => <div key={label} className="rounded-xl border border-white/10 bg-white/[.03] p-3"><div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-[#92988a]"><Icon className="h-3 w-3" />{label}</div><div className="mt-2 truncate text-sm font-semibold text-[#f4f1e8]" style={label === 'XP earned' ? { color: r.color } : undefined}>{value}</div></div>)}</div>{person.tags.length > 0 && <div className="mt-6 flex flex-wrap gap-2">{person.tags.map(tag => <span key={tag} className="rounded-full border border-white/10 px-3 py-1.5 mono text-[10px] text-[#aeb5a4]">{tag}</span>)}</div>}<div className="mt-auto flex gap-2 pt-8"><button onClick={() => { deletePerson(person.id); onClose() }} className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-[#ef806b]/30 py-3 text-xs font-bold text-[#ef806b] hover:bg-[#ef806b]/10"><Trash2 className="h-4 w-4" /> Remove record</button><button onClick={onClose} className="flex items-center justify-center rounded-xl bg-[#d8f36a] px-4 text-[#111310]"><ArrowUpRight className="h-4 w-4" /></button></div></div>
+  </motion.div></motion.div>
 }
