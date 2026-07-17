@@ -1,16 +1,9 @@
 import type { Metadata, Viewport } from "next"
-import { Plus_Jakarta_Sans } from "next/font/google"
 import "./globals.css"
 import ClientLayout from "./ClientLayout"
 
-const jakarta = Plus_Jakarta_Sans({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-  variable: "--font-sans",
-})
-
 export const viewport: Viewport = {
-  themeColor: "#09090B",
+  themeColor: "#111310",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -27,8 +20,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${jakarta.variable} h-full antialiased dark`}>
-      <body className="h-full overflow-hidden bg-[#09090B]"><ClientLayout>{children}</ClientLayout></body>
+    <html lang="en" className="h-full antialiased dark">
+      <body className="h-full overflow-hidden bg-[#111310]"><ClientLayout>{children}</ClientLayout></body>
     </html>
   )
 }

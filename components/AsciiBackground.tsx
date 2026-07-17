@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react'
 
-const CHARS = '01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン▀▄▌▐░▒▓█'
+const CHARS = '01/\\[]{}<>+-=._:;'
 
 export default function AsciiBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -30,7 +30,7 @@ export default function AsciiBackground() {
     const speeds: number[] = Array(cols).fill(0).map(() => Math.random() * 0.3 + 0.1)
 
     const draw = () => {
-      ctx.fillStyle = 'rgba(9, 9, 11, 0.08)'
+      ctx.fillStyle = 'rgba(17, 19, 16, 0.12)'
       ctx.fillRect(0, 0, canvas.width, canvas.height)
 
       ctx.font = `${fontSize}px monospace`
@@ -42,12 +42,12 @@ export default function AsciiBackground() {
           const x = i * fontSize
           const y = drops[i] * fontSize
 
-          const alpha = 0.04 + Math.random() * 0.04
-          ctx.fillStyle = `rgba(99, 102, 241, ${alpha})`
+          const alpha = 0.025 + Math.random() * 0.035
+          ctx.fillStyle = `rgba(216, 243, 106, ${alpha})`
           ctx.fillText(char, x, y)
 
           if (Math.random() > 0.95) {
-            ctx.fillStyle = `rgba(6, 182, 212, ${alpha * 2})`
+            ctx.fillStyle = `rgba(241, 154, 98, ${alpha * 2})`
             ctx.fillText(char, x, y)
           }
         }
@@ -73,7 +73,7 @@ export default function AsciiBackground() {
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 w-full h-full pointer-events-none z-0 opacity-60"
+      className="fixed inset-0 w-full h-full pointer-events-none z-0 opacity-45"
       aria-hidden="true"
     />
   )
