@@ -5,14 +5,14 @@
 1. Push this repo to GitHub
 2. In Cloudflare Pages dashboard → Create Project → Connect your repo
 3. Configure:
-   - **Framework preset:** Next.js
+   - **Framework preset:** None (static site)
    - **Build command:** `npm run build`
    - **Build output directory:** `out`
    - **Environment variables:**
      - `OPENROUTER_API_KEY` = your OpenRouter API key
 4. Deploy
 
-The `functions/api/` directory is auto-detected by Cloudflare Pages and will handle `/api/verify-person`, `/api/verify-quest`, `/api/generate-quests`.
+The `functions/api/` directory is auto-detected by Cloudflare Pages and handles `/api/verify-person`, `/api/verify-quest`, `/api/generate-quests`.
 
 ## Local Dev
 
