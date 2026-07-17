@@ -1,10 +1,8 @@
 import type { NextConfig } from "next"
 
-const isCFPages = !!process.env.CF_PAGES
-
 const nextConfig: NextConfig = {
+  output: "export",
   images: { unoptimized: true },
-  ...(isCFPages ? { output: "export" } : {}),
 }
 
 export default nextConfig
